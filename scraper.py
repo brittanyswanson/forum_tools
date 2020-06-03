@@ -577,7 +577,7 @@ def main():
     driver = navigate_to(accepted_applications_url, driver)
     species_subforums = get_subforums(driver)
 
-    print("User input requested.  Which species?")
+ 
 
     
     
@@ -585,13 +585,17 @@ def main():
     while selected == False:
         count = 0
         # -- PRINT MENU --
+        print('*' * 40)
+        print("Species Menu")
+        print('*' * 40)
         for species in species_subforums:
             count += 1
             print(str(count) + " " + species)
         
         print("0 EXIT")
+        print('*' * 40)
 
-        user_input = input("Enter number choice: ")
+        user_input = input("Enter which species (number) to see characters for: ")
         # -- TODO: Add validation around user_input
 
         if int(user_input) != 0:
@@ -602,21 +606,45 @@ def main():
                     key_associated_with_chosen_species = species
             
             species_urls = species_subforums[key_associated_with_chosen_species]
-                
-
-
-
-        elif user_input == "4":
-            chosen_species = species_subforums["DRYADS"]
-            driver =  navigate_to(species_subforums["AETHERS"], driver)
+            print("Subforum URL for " + key_associated_with_chosen_species + ": " + species_urls)
+            driver =  navigate_to(species_urls, driver)
+            
+            # Restricted Content
             if check_for_content_restriction(driver) == True:
                 print("Deal with restricted content.")
             else:
-                if check_for_multiple_pages(driver) == False:
-                    write_to_log(str(datetime.now()) + "\t\tget_active_characters: Multiple pages located ")
-                    subforum_topics = get_topics(driver)
+                print("No restricted content here!")
+            
+            # Multiple or Single Page processing
+            if check_for_multiple_pages(driver) == False:
+                write_to_log(str(datetime.now()) + "\t\tget_active_characters: Single page of characters ")
+                subforum_topics = get_topics(driver)
+                for topic in subforum_topics:
                     print(subforum_topics)
+            else:
+                write_to_log(str(datetime.now()) + "\t\tget_active_characters: Multiple pages of characters ")
+                subforum_topics = get_topics(driver)
+
+                other_pages = driver.find_elements(By.XPATH,"/html[1]/body[1]/div[1]/div[4]/table[2]/tbody[1]/tr[1]/td[1]/span[1]//a")
+                for pages in other_pages:
+                    # Empty out additional_page_links
+                    additional_page_links = []
+                    
+                    if pages.text != '':
+                        page_link = pages.get_attribute('href')
+                        additional_page_links.append(page_link)
+
+                for link in additional_page_links:
+                    driver =  navigate_to(page_link, driver)
+                    additional_topics = get_topics(driver)
+                    if additional_topics != None:
+                        topics_links.extend(additional_topics)
+
+            selected = True
+                
+
         
+        elif user_input == "0":
             selected = True
 
         else:
