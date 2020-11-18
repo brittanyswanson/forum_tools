@@ -2,3 +2,8 @@ env\**
 env\Lib\*
 env.ini
 .vscode\**
+.vscode/.ropeproject/config.py
+.vscode/launch.json
+.vscode/settings.json
+chromedriver.exe
+debug.log
