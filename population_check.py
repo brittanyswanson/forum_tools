@@ -188,8 +188,9 @@ def char_details(url):
         # ooc_ele = parent_element.find_elements_by_tag_name("li")
         ooc_ele = parent_element.find_elements_by_xpath("//div[@class='info']//li")
 
-        if len(ooc_ele) < 1:
+        if len(ooc_ele) < 9:
             player_name = "error"
+            print("There's nothing in the name space.")
         else:
             print("ooc_ele has more than 1 record in it.")
             count = 0
@@ -395,7 +396,7 @@ def get_all_characters_with_missing_fields():
             my_cursor = mydb.cursor()
             my_cursor.execute(select_statement)
             all_chars = my_cursor.fetchall()
-            if len(all_chars) < 1:
+            if len(all_chars) < 2:
                 print("Working on empty ones now.")
                 my_cursor.execute(select_statement_2)
                 all_chars = my_cursor.fetchall()
