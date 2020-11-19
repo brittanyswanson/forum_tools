@@ -192,6 +192,10 @@ def char_details(url):
             player_name = "error"
         else:
             print("ooc_ele has more than 1 record in it.")
+            count = 0
+            for itera in ooc_ele:
+                print(str(count) + str(itera.text))
+                count+=1
             player_info = (ooc_ele[9].text).split('\n')
             player_name = player_info[1].lower()
 
