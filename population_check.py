@@ -672,6 +672,8 @@ def main():
         wants_active = args.update_stats
         if wants_active == 'Y' or wants_active == 'y':
             update_character_stats('Y')
+        else:
+            update_character_stats('N')
 
     # -----------------------------------------------------------
     # Re-process the characters with errors in species or player
