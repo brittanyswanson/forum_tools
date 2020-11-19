@@ -188,12 +188,16 @@ def char_details(url):
         ooc_ele = parent_element.find_elements_by_xpath("//div[@class='info']//li")
 
         print("char_details() > split string and get player name")
-        count = 0
-        for a in ooc_ele:
-            print(str(count) + " " + a)
-        player_info = (ooc_ele[9].text).split('\n')
-        player_name = player_info[1].lower()
-        print("char_details() > got player name")
+        if len(ooc_ele) < 1:
+            print("Got nothing useful back for ooc_ele")
+            player_name = "error"
+        else:
+            count = 0
+            for a in ooc_ele:
+                print(str(count) + " " + a)
+            player_info = (ooc_ele[9].text).split('\n')
+            player_name = player_info[1].lower()
+            print("char_details() > got player name")
 
         info = [species,player_name]
 
