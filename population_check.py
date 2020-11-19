@@ -599,7 +599,7 @@ def update_character_stats(active_status):
 
         # unpack these details
         if len(additional_details) < 1:
-            print("update_character_stats() > Additional Details are not what you think they are. "
+            print("update_character_stats() > Additional Details are not what you think they are. ")
         else:
             species = additional_details[0]
             player_name = additional_details[1]
