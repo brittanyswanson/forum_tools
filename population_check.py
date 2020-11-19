@@ -172,29 +172,22 @@ def char_details(url):
     try:
         div_element = driver.find_element(By.XPATH,"//div[@class='hundredeuro']/div")
         species = div_element.get_attribute("id")
-        print("char_details() > got species")
 
         # Must check the checkbox to view player
         # Player Info
         # click on ooc tab
-        print("char_details() > click on ooc tab")
         driver.find_element(By.XPATH,'//label[@title="ooc"]').click()
         # Should be div class="tab"
         time.sleep(3)
-        print("char_details() > get parent element")
         parent_element = driver.find_element(By.XPATH,'//label[@title="ooc"]').parent
         # ooc_ele = parent_element.find_elements_by_tag_name("li")
-        print("char_details() > get ooc element")
         ooc_ele = parent_element.find_elements_by_xpath("//div[@class='info']//li")
 
-        print("char_details() > split string and get player name")
         if len(ooc_ele) < 1:
-            print("Got nothing useful back for ooc_ele")
             player_name = "error"
         else:
             player_info = (ooc_ele[9].text).split('\n')
             player_name = player_info[1].lower()
-            print("char_details() > got player name")
 
         info = [species,player_name]
 
@@ -203,7 +196,10 @@ def char_details(url):
         print("char_details() > Error somewhere in try statement.  Still going on")
         info = ["error", "error"]
 
-    return info
+    finally:
+        driver.close()
+        driver.quit()
+        return info
 
 def truncate_character_table():
     print("Connected to database")
@@ -591,7 +587,6 @@ def update_character_stats(active_status):
     temp_list = []
     record_count = 0
 
-    print("update_character_stats() > Getting all characters from db")
     character_url_list = get_all_characters_from_db(active_status)
     for character_url in character_url_list:
         if (record_count%10==0 and record_count !=0):
@@ -604,17 +599,14 @@ def update_character_stats(active_status):
 
         # unpack these details
         if len(additional_details) < 1:
-            print("update_character_stats() > Error getting the species and player name for " + str(character_url))
         else:
             species = additional_details[0]
             player_name = additional_details[1]
-            print("update_character_stats() > Added the species and player_name to the list")
 
             temp_list.clear()
             temp_list = [species, player_name, character_url]
-            print("update_character_stats() > Adding character to list to insert")
             details_to_insert.append(temp_list.copy())
-            print("update_character_stats() > Added character to list to insert")
+            print("update_character_stats() > Added" + str(character_url))
         record_count+=1
         
 
