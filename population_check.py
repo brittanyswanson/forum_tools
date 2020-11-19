@@ -172,6 +172,7 @@ def char_details(url):
     try:
         div_element = driver.find_element(By.XPATH,"//div[@class='hundredeuro']/div")
         species = div_element.get_attribute("id")
+        print("char_details() > got species")
 
         # Must check the checkbox to view player
         # Player Info
@@ -184,12 +185,13 @@ def char_details(url):
 
         player_info = (ooc_ele[9].text).split('\n')
         player_name = player_info[1].lower()
+        print("char_details() > got player name")
 
         info = [species,player_name]
 
 
     except Exception as e:
-        print(e)
+        print(print("char_details() > Error somewhere in try statement.  Still going on")
         info = ["error", "error"]
 
     return info
@@ -580,28 +582,31 @@ def update_character_stats(active_status):
     temp_list = []
     record_count = 0
 
-    print("Getting all characters from db")
+    print("update_character_stats() > Getting all characters from db")
     character_url_list = get_all_characters_from_db(active_status)
     for character_url in character_url_list:
         if (record_count%10==0 and record_count !=0):
-            print("Gathered details from " + str(record_count) + " records")
+            print("update_character_stats() > Gathered details from " + str(record_count) + " records")
             update_with_details(details_to_insert)
             details_to_insert.clear()
         #CREATE check_if_application_is_blank()
-        # Returns species, character_name for each url
+        # Returns species, character_name for each url'
         additional_details = char_details(character_url)
 
         # unpack these details
-        species = additional_details[0]
-        player_name = additional_details[1]
+        if len(additional_details) < 1:
+            print("update_character_stats() > Error getting the species and player name for " + str(character_url))
+        else:
+            species = additional_details[0]
+            player_name = additional_details[1]
 
-        temp_list.clear()
-        temp_list = [species, player_name, character_url]
-        details_to_insert.append(temp_list.copy())
+            temp_list.clear()
+            temp_list = [species, player_name, character_url]
+            details_to_insert.append(temp_list.copy())
         record_count+=1
         
 
-    print("Update database")
+    print("update_character_stats() > Update database with details in list.")
     update_with_details(details_to_insert)
 
 def main():
