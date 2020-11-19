@@ -624,7 +624,7 @@ def main():
     # -----------------------------------------------------------
     if args.active:
         print("Getting active characters to insert in db")
-        # get_active_characters()
+        get_active_characters()
 
     # -----------------------------------------------------------
     # Archived Characters Run
