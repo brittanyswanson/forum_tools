@@ -177,12 +177,16 @@ def char_details(url):
         # Must check the checkbox to view player
         # Player Info
         # click on ooc tab
+        print("char_details() > click on ooc tab")
         driver.find_element(By.XPATH,'//label[@title="ooc"]').click()
         # Should be div class="tab"
+        print("char_details() > get parent element")
         parent_element = driver.find_element(By.XPATH,'//label[@title="ooc"]').parent
         # ooc_ele = parent_element.find_elements_by_tag_name("li")
+        print("char_details() > get ooc element")
         ooc_ele = parent_element.find_elements_by_xpath("//div[@class='info']//li")
 
+        print("char_details() > split string and get player name")
         player_info = (ooc_ele[9].text).split('\n')
         player_name = player_info[1].lower()
         print("char_details() > got player name")
@@ -190,7 +194,7 @@ def char_details(url):
         info = [species,player_name]
 
 
-    except Exception as e:
+    except:
         print("char_details() > Error somewhere in try statement.  Still going on")
         info = ["error", "error"]
 
@@ -599,10 +603,13 @@ def update_character_stats(active_status):
         else:
             species = additional_details[0]
             player_name = additional_details[1]
+            print("update_character_stats() > Added the species and player_name to the list")
 
             temp_list.clear()
             temp_list = [species, player_name, character_url]
+            print("update_character_stats() > Adding character to list to insert")
             details_to_insert.append(temp_list.copy())
+            print("update_character_stats() > Added character to list to insert")
         record_count+=1
         
 
