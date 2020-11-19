@@ -191,7 +191,7 @@ def char_details(url):
         if len(ooc_ele) < 1:
             player_name = "error"
         else:
-            print("ooc_ele ahs more than 1 record in it.")
+            print("ooc_ele has more than 1 record in it.")
             player_info = (ooc_ele[9].text).split('\n')
             player_name = player_info[1].lower()
 
@@ -392,8 +392,10 @@ def get_all_characters_with_missing_fields():
             my_cursor.execute(select_statement)
             all_chars = my_cursor.fetchall()
             if len(all_chars) < 1:
+                print("Working on empty ones now.")
                 my_cursor.execute(select_statement_2)
                 all_chars = my_cursor.fetchall()
+                print(str(len(all_chars)))
             
             mydb.close()
 
