@@ -191,7 +191,7 @@ def char_details(url):
 
 
     except Exception as e:
-        print(print("char_details() > Error somewhere in try statement.  Still going on")
+        print("char_details() > Error somewhere in try statement.  Still going on")
         info = ["error", "error"]
 
     return info
