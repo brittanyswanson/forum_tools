@@ -169,15 +169,20 @@ def get_page_topics(driver):
 def char_details(url):
     driver = webdriver.Chrome(executable_path=path,options=chrome_options)
     driver = navigate_to(url, driver)
+    print("Navigated to webpage successfully")
     try:
+        print("Getting hundredeuro ele")
         div_element = driver.find_element(By.XPATH,"//div[@class='hundredeuro']/div")
+        print("Getting the species via div id element")
         species = div_element.get_attribute("id")
+        print("Got species")
 
         # Must check the checkbox to view player
         # Player Info
         # click on ooc tab
         driver.find_element(By.XPATH,'//label[@title="ooc"]').click()
         # Should be div class="tab"
+        print("Clicked on OOC tab")
         time.sleep(3)
         parent_element = driver.find_element(By.XPATH,'//label[@title="ooc"]').parent
         # ooc_ele = parent_element.find_elements_by_tag_name("li")
@@ -186,6 +191,7 @@ def char_details(url):
         if len(ooc_ele) < 1:
             player_name = "error"
         else:
+            print("ooc_ele ahs more than 1 record in it.")
             player_info = (ooc_ele[9].text).split('\n')
             player_name = player_info[1].lower()
 
@@ -577,6 +583,7 @@ def get_additional_details_about_character(url):
     temp_list = []
     details_to_insert = []
     # Returns species, character_name for each url
+    print("Getting additional details for " + url)
     additional_details = char_details(url)
 
     # unpack these details
@@ -605,7 +612,7 @@ def update_character_stats(active_status):
         additional_details = char_details(character_url)
 
         # unpack these details
-        if len(additional_details) < 1:
+        if len(additional_details) < 2:
             print("update_character_stats() > Additional Details are not what you think they are. ")
         else:
             species = additional_details[0]
