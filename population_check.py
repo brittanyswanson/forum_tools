@@ -180,6 +180,7 @@ def char_details(url):
         print("char_details() > click on ooc tab")
         driver.find_element(By.XPATH,'//label[@title="ooc"]').click()
         # Should be div class="tab"
+        time.sleep(3)
         print("char_details() > get parent element")
         parent_element = driver.find_element(By.XPATH,'//label[@title="ooc"]').parent
         # ooc_ele = parent_element.find_elements_by_tag_name("li")
@@ -190,7 +191,7 @@ def char_details(url):
         count = 0
         for a in ooc_ele:
             print(str(count) + " " + a)
-        #player_info = (ooc_ele[9].text).split('\n')
+        player_info = (ooc_ele[9].text).split('\n')
         player_name = player_info[1].lower()
         print("char_details() > got player name")
 
