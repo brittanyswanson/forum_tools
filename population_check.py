@@ -373,6 +373,7 @@ def get_all_characters_with_missing_fields():
     character_url_list = []
     # Statements
     select_statement = """SELECT url FROM characters WHERE species = 'error' or player_name = 'error'"""
+    select_statement_2 = """SELECT url FROM characters WHERE species is null or player_name is null"""
 
     mydb = connect_to_DB()
 
@@ -384,14 +385,20 @@ def get_all_characters_with_missing_fields():
             my_cursor = mydb.cursor()
             my_cursor.execute(select_statement)
             all_chars = my_cursor.fetchall()
+            if len(all_chars) < 1:
+                my_cursor.execute(select_statement_2)
+                all_chars = my_cursor.fetchall()
+            
             mydb.close()
+
+            
     except Exception as e:
         import traceback
         traceback.print_exc()
         print(str(e))
         print("Failure getting characters with errors")
         return False
-    
+
     for character in all_chars:
         character_url_list.append(character[0])
     return character_url_list
