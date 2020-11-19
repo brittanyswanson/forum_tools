@@ -192,11 +192,6 @@ def char_details(url):
             print("Got nothing useful back for ooc_ele")
             player_name = "error"
         else:
-            print(str(len(ooc_ele)))
-            count = 0
-            for a in ooc_ele:
-                print(str(count) + " " + a)
-                count+=1
             player_info = (ooc_ele[9].text).split('\n')
             player_name = player_info[1].lower()
             print("char_details() > got player name")
