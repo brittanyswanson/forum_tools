@@ -3,3 +3,4 @@ env.ini
 chromedriver.exe
 debug.log
 env/
+*.log
