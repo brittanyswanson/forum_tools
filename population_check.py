@@ -13,9 +13,15 @@ import mysql.connector
 import configparser
 import time
 import argparse
+import logging
 
 timeout = 5
-logging = True
+# Logging Setup
+logging.basicConfig(filename="population.log", 
+                    level=logging.INFO,
+                    format="%(asctime)s - %(levelname)s - %(message)s", 
+                    filemode='a') 
+logger = logging.getLogger()
 
 # Selenium options
 chrome_options = Options()
@@ -238,7 +244,6 @@ def truncate_character_table():
         return False
 
 def insert_database(list_of_records):
-    print("Connected to database")
     mydb = connect_to_DB()
 
     # Statements
@@ -251,22 +256,20 @@ def insert_database(list_of_records):
             mydb.ping(True)
             my_cursor = mydb.cursor()
             my_cursor.executemany(insert_statement,list_of_records)
-            print("Loaded characters.")
             mydb.commit()
-            print(my_cursor.rowcount, " records inserted successfully into character table")
+            logger.info(my_cursor.rowcount, " records inserted successfully into character table")
             mydb.close()
     except Exception as e:
         import traceback
         traceback.print_exc()
-        print(str(e))
+        logger.error(str(e))
         mydb.rollback()
-        print("Failure")
+        logger.error("Failure in insert_database()")
         return False
 
 def update_with_details(list_of_records):
     # Used in update_character_stats()
     # list_of_records = [species, player_name, character_url]
-    print("Connected to database")
     mydb = connect_to_DB()
 
     # Statements
@@ -279,23 +282,22 @@ def update_with_details(list_of_records):
             mydb.ping(True)
             my_cursor = mydb.cursor()
             my_cursor.executemany(update_statement,list_of_records)
-            print("Updated Characters.")
             mydb.commit()
-            print(my_cursor.rowcount, " records updated successfully in character table")
+            logger.info(my_cursor.rowcount, " records updated successfully in character table")
             mydb.close()
     except Exception as e:
         import traceback
         traceback.print_exc()
-        print(str(e))
+        logger.error(str(e))
         mydb.rollback()
-        print("Failure")
+        logger.error("Failure in update_with_details()")
         return False
 
 def update_character_activity(list_of_records):
     mydb = connect_to_DB()
 
     # Statements
-    update_statement = """UPDATE characters SET active = 'Y', SET updated = now() WHERE url = %s""" 
+    update_statement = """UPDATE characters SET active = 'Y', updated = now(), name = %s WHERE url = %s""" 
 
     try:
         if mydb is None:
@@ -303,17 +305,19 @@ def update_character_activity(list_of_records):
         else:
             mydb.ping(True)
             my_cursor = mydb.cursor()
+            for item in list_of_records:
+                print(item)
             my_cursor.executemany(update_statement,list_of_records)
-            print("Updated Characters.")
+            logger.info("Updated Characters.")
             mydb.commit()
-            print(my_cursor.rowcount, " records updated successfully into character table")
+            logger.info(my_cursor.rowcount, " records updated successfully into character table")
             mydb.close()
     except Exception as e:
         import traceback
         traceback.print_exc()
-        print(str(e))
+        logger.error(str(e))
         mydb.rollback()
-        print("Failure")
+        logger.error("Failure in update_character_activity()")
         return False
 
 def get_all_characters_from_db(active):
@@ -345,9 +349,9 @@ def get_all_characters_from_db(active):
     except Exception as e:
         import traceback
         traceback.print_exc()
-        print(str(e))
+        logger.error(str(e))
         mydb.rollback()
-        print("Failure")
+        logger.error("Failure in get_all_characters_from_db()")
         return False
     
     for character in all_chars:
@@ -417,12 +421,12 @@ def get_all_characters_with_missing_fields():
     return character_url_list
 
 def get_active_characters():
-    print("Getting active characters.")
     character_list = []
     if 'chrome' in config:
         driver = webdriver.Chrome(executable_path=path,options=chrome_options)
         driver.implicitly_wait(10)
         
+        logger.info("navigate to accepted_applications_url")
         driver = navigate_to(accepted_applications_url, driver)
 
         # subforums dictionary returned
@@ -435,7 +439,6 @@ def get_active_characters():
         # **************************************************************************
         # Navigate to each sub forum
         for subforum_name, subforum_url in character_subforums.items():
-            print("Getting topics for " + str(subforum_name))
             driver =  navigate_to(subforum_url, driver)
         
             # Get characters (topics) from the page & put in master character list
@@ -460,8 +463,8 @@ def get_active_characters():
                             if temp_topic_list != None:
                                 character_list.extend(temp_topic_list.copy())
                                 temp_topic_list.clear()
+            logger.info("Finished processing " + str(subforum_name))
         temporary_list = []
-        print("Rebuilding the list for database insert")
         new_active_characters = []
         update_character_to_active = []
         existing_active_urls = get_all_characters_from_db("Y")
@@ -476,22 +479,26 @@ def get_active_characters():
                     new_active_characters.append(temporary_list.copy())
                 else:
                     temporary_list.clear()
-                    temporary_list = [character[0], character[1],'','Y']
+                    temporary_list = [character[0], character[1]]
                     update_character_to_active.append(temporary_list.copy())
-            else:
-                print("Existing character: " + character[0])
 
 
         # Insert new characters
         if len(new_active_characters) > 0:
             insert_database(new_active_characters)
-        else:
-            print("No new active characters.")
+            logger.info("New characters inserted into database: ")
+            for i in new_active_characters:
+                logger.info(i)
+
         # Update existing characters
         if len(update_character_to_active) > 0:
             update_character_activity(update_character_to_active)
-        else:
-            print("No characters to update activity status.")
+            logger.info("Reactivating in database: ")
+            for a in update_character_to_active:
+                logger.info(a)
+        
+        logger.info("Completed process.")
+
     
 def get_archived_characters():
     character_list = []
@@ -654,21 +661,21 @@ def main():
     # Active Characters Run
     # -----------------------------------------------------------
     if args.active:
-        print("Getting active characters to insert in db")
+        logger.info("Starting population_check.py -a")
         get_active_characters()
 
     # -----------------------------------------------------------
     # Archived Characters Run
     # -----------------------------------------------------------
     elif args.archived:
-        print("Getting archived characters to insert in db")
+        logger.info("Getting archived characters to insert in db")
         get_archived_characters()
 
     # -----------------------------------------------------------
     # Update character stats - requires input of Y or N
     # -----------------------------------------------------------
     elif args.update_stats:
-        print("Update character stats with active characters only? ")
+        logger.info("Update character stats with active characters only? ")
         wants_active = args.update_stats
         if wants_active == 'Y' or wants_active == 'y':
             update_character_stats('Y')
