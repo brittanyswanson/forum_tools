@@ -17,7 +17,7 @@ import logging
 
 timeout = 5
 # Logging Setup
-logging.basicConfig(filename=time.strftime('my-%Y-%m-%d.log'), 
+logging.basicConfig(filename=time.strftime('population_check-%Y-%m-%d.log'), 
                     level=logging.INFO,
                     format="%(asctime)s - %(levelname)s - %(message)s", 
                     filemode='a') 
@@ -56,7 +56,7 @@ def check_for_content_restriction(driver):
         else:
             return False
     except NoSuchElementException:
-        print("No maintitle div found.")
+        logger.error("No maintitle div found.")
         exit()
 
 def navigate_to(url, driver):
@@ -64,7 +64,7 @@ def navigate_to(url, driver):
 
     #Handle content restriction if applicable
     if check_for_content_restriction(driver) == True:
-        print("Crap! Content restriction!")
+        logger.info("Crap! Content restriction!")
         # Day
         day_element = driver.find_element(By.NAME,"day")
         Select(day_element).select_by_value("12")
@@ -157,7 +157,7 @@ def get_page_topics(driver):
 
 
         if len(elementListByXpath) == 0:
-            print("ERROR: get_page_topics() Fuck.  No topics found.")
+            logger.error("ERROR: get_page_topics() Fuck.  No topics found.")
             
         else:
             for ele in elementListByXpath:
@@ -170,25 +170,25 @@ def get_page_topics(driver):
 
             return page_list
     except TimeoutException:
-        print("ERROR: get_page_topics() Timed out.")
+        logger.error("ERROR: get_page_topics() Timed out.")
 
 def char_details(url):
     driver = webdriver.Chrome(executable_path=path,options=chrome_options)
     driver = navigate_to(url, driver)
-    print("Navigated to webpage successfully")
+    logger.debut("Navigated to webpage successfully")
     try:
-        print("Getting hundredeuro ele")
+        logger.debug("Getting hundredeuro ele")
         div_element = driver.find_element(By.XPATH,"//div[@class='hundredeuro']/div")
-        print("Getting the species via div id element")
+        logger.debug("Getting the species via div id element")
         species = div_element.get_attribute("id")
-        print("Got species")
+        logger.debug("Got species")
 
         # Must check the checkbox to view player
         # Player Info
         # click on ooc tab
         driver.find_element(By.XPATH,'//label[@title="ooc"]').click()
         # Should be div class="tab"
-        print("Clicked on OOC tab")
+        logger.debug("Clicked on OOC tab")
         time.sleep(3)
         parent_element = driver.find_element(By.XPATH,'//label[@title="ooc"]').parent
         # ooc_ele = parent_element.find_elements_by_tag_name("li")
@@ -196,13 +196,13 @@ def char_details(url):
 
         if len(ooc_ele) < 9:
             player_name = "error"
-            print("There's nothing in the name space.")
+            logger.debug("There's nothing in the name space.")
         else:
-            print("ooc_ele has more than 1 record in it.")
-            count = 0
-            for itera in ooc_ele:
-                print(str(count) + str(itera.text))
-                count+=1
+            logger.debug("ooc_ele has more than 1 record in it.")
+            # count = 0
+            # for itera in ooc_ele:
+            #     print(str(count) + str(itera.text))
+            #     count+=1
             player_info = (ooc_ele[9].text).split('\n')
             player_name = player_info[1].lower()
 
@@ -210,7 +210,7 @@ def char_details(url):
 
 
     except:
-        print("char_details() > Error somewhere in try statement.  Still going on")
+        logger.error("char_details() > Error somewhere in try statement regarding " + url)
         info = ["error", "error"]
 
     finally:
@@ -257,7 +257,7 @@ def insert_database(list_of_records):
             my_cursor = mydb.cursor()
             my_cursor.executemany(insert_statement,list_of_records)
             mydb.commit()
-            logger.info(my_cursor.rowcount, " records inserted successfully into character table")
+            logger.info(str(my_cursor.rowcount) + " records inserted successfully into character table")
             mydb.close()
     except Exception as e:
         import traceback
@@ -283,7 +283,7 @@ def update_with_details(list_of_records):
             my_cursor = mydb.cursor()
             my_cursor.executemany(update_statement,list_of_records)
             mydb.commit()
-            logger.info(my_cursor.rowcount, " records updated successfully in character table")
+            logger.debug(str(my_cursor.rowcount) + " records updated successfully in character table")
             mydb.close()
     except Exception as e:
         import traceback
@@ -310,7 +310,7 @@ def update_character_activity(list_of_records):
             my_cursor.executemany(update_statement,list_of_records)
             logger.info("Updated Characters.")
             mydb.commit()
-            logger.info(my_cursor.rowcount, " records updated successfully into character table")
+            logger.info(str(my_cursor.rowcount) + " records updated successfully into character table")
             mydb.close()
     except Exception as e:
         import traceback
@@ -398,13 +398,14 @@ def get_all_characters_with_missing_fields():
         else:
             mydb.ping(True)
             my_cursor = mydb.cursor()
+
+            logger.info("Working on error fields.")
             my_cursor.execute(select_statement)
-            all_chars = my_cursor.fetchall()
-            if len(all_chars) < 2:
-                print("Working on empty ones now.")
-                my_cursor.execute(select_statement_2)
-                all_chars = my_cursor.fetchall()
-                print(str(len(all_chars)))
+            all_error_chars = my_cursor.fetchall()
+
+            logger.info("Working on empty fields now.")
+            my_cursor.execute(select_statement_2)
+            all_null_chars = my_cursor.fetchall()
             
             mydb.close()
 
@@ -412,12 +413,14 @@ def get_all_characters_with_missing_fields():
     except Exception as e:
         import traceback
         traceback.print_exc()
-        print(str(e))
-        print("Failure getting characters with errors")
+        logger.error(str(e))
+        logger.error("Failure getting characters with errors")
         return False
 
-    for character in all_chars:
+    for character in all_error_chars:
         character_url_list.append(character[0])
+    for char in all_null_chars:
+        character_url_list.append(char[0])
     return character_url_list
 
 def get_active_characters():
@@ -474,6 +477,9 @@ def get_active_characters():
             if character[1] not in existing_active_urls:
                 # Not existing inactive
                 if character[1] not in existing_inactive_urls:
+                    # **************************************************************************
+                    # TODO: Add call to get additional details about character if new
+                    # **************************************************************************
                     temporary_list.clear()
                     temporary_list = [character[0], character[1],'','Y']
                     new_active_characters.append(temporary_list.copy())
@@ -498,6 +504,13 @@ def get_active_characters():
                 logger.info(a)
         
         logger.info("Completed process.")
+
+        # Hopefully this takes care of the slow running on the server
+        try:
+            driver.close()
+            logger.info("driver successfully closed.")
+        except Exception as e:
+            logger.info("driver already closed.")
 
     
 def get_archived_characters():
@@ -597,7 +610,7 @@ def get_additional_details_about_character(url):
     temp_list = []
     details_to_insert = []
     # Returns species, character_name for each url
-    print("Getting additional details for " + url)
+    logger.info("get_additional_details_about_character(" + url + ")")
     additional_details = char_details(url)
 
     # unpack these details
@@ -618,7 +631,7 @@ def update_character_stats(active_status):
     character_url_list = get_all_characters_from_db(active_status)
     for character_url in character_url_list:
         if (record_count%10==0 and record_count !=0):
-            print("update_character_stats() > Gathered details from " + str(record_count) + " records")
+            logger.info("Gathered details from " + str(record_count) + " records")
             update_with_details(details_to_insert)
             details_to_insert.clear()
         #CREATE check_if_application_is_blank()
@@ -627,7 +640,7 @@ def update_character_stats(active_status):
 
         # unpack these details
         if len(additional_details) < 2:
-            print("update_character_stats() > Additional Details are not what you think they are. ")
+            logger.error("update_character_stats() > Additional Details are not what you think they are. ")
         else:
             species = additional_details[0]
             player_name = additional_details[1]
@@ -635,11 +648,11 @@ def update_character_stats(active_status):
             temp_list.clear()
             temp_list = [species, player_name, character_url]
             details_to_insert.append(temp_list.copy())
-            print("update_character_stats() > Added" + str(character_url))
+            logger.info("update_character_stats() > Added" + str(character_url) + " to list.")
         record_count+=1
         
 
-    print("update_character_stats() > Update database with details in list.")
+    logger.info("update_character_stats() > Update database with list.")
     update_with_details(details_to_insert)
 
 def main():
@@ -678,14 +691,17 @@ def main():
         logger.info("Update character stats with active characters only? ")
         wants_active = args.update_stats
         if wants_active == 'Y' or wants_active == 'y':
+            logger.info("yes")
             update_character_stats('Y')
         else:
+            logger.info("no")
             update_character_stats('N')
 
     # -----------------------------------------------------------
     # Re-process the characters with errors in species or player
     # -----------------------------------------------------------
     elif args.error_rerun:
+        logger.info("Getting all characters with missing fields.")
         error_characters = get_all_characters_with_missing_fields()
         for i in error_characters:
             char_details = get_additional_details_about_character(i)
@@ -696,6 +712,7 @@ def main():
     # -----------------------------------------------------------
     elif args.update_character:
         char_url = args.update_character
+        logger.info("Update character: " + char_url)
         char_details = get_additional_details_about_character(char_url)
         update_with_details(char_details)
 
