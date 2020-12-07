@@ -674,20 +674,23 @@ def main():
     # Active Characters Run
     # -----------------------------------------------------------
     if args.active:
-        logger.info("Starting population_check.py -a")
+        logger.info("Starting population_check.py --active/-a")
         get_active_characters()
+        logger.info("Ending population_check.py --active/-a")
 
     # -----------------------------------------------------------
     # Archived Characters Run
     # -----------------------------------------------------------
     elif args.archived:
-        logger.info("Getting archived characters to insert in db")
+        logger.info("Starting population_check.py --archived/-ar")
         get_archived_characters()
+        logger.info("Ending population_check.py --archived/-ar")
 
     # -----------------------------------------------------------
     # Update character stats - requires input of Y or N
     # -----------------------------------------------------------
     elif args.update_stats:
+        logger.info("Starting population_check.py --update_stats/-up_stats")
         logger.info("Update character stats with active characters only? ")
         wants_active = args.update_stats
         if wants_active == 'Y' or wants_active == 'y':
@@ -696,26 +699,29 @@ def main():
         else:
             logger.info("no")
             update_character_stats('N')
+        logger.info("Ending population_check.py --update_stats/-up_stats")
 
     # -----------------------------------------------------------
     # Re-process the characters with errors in species or player
     # -----------------------------------------------------------
     elif args.error_rerun:
-        logger.info("Starting error_rerun process.")
+        logger.info("Starting population_check.py --error_rerun/-err")
         error_characters = get_all_characters_with_missing_fields()
         for i in error_characters:
             char_details = get_additional_details_about_character(i)
             # char_details = [species, player_name, url]
             update_with_details(char_details)
-        logger.info("Process Complete")
+        logger.info("Ending population_check.py --error_rerun/-err")
     # -----------------------------------------------------------
     # Individual URL to update character details
     # -----------------------------------------------------------
     elif args.update_character:
+        logger.info("Starting population_check.py --update_character/-up_char")
         char_url = args.update_character
         logger.info("Update character: " + char_url)
         char_details = get_additional_details_about_character(char_url)
         update_with_details(char_details)
+        logger.info("Ending population_check.py --update_character/-up_char")
 
     else:
         print('What have you done?')
