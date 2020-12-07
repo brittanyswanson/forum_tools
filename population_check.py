@@ -17,7 +17,7 @@ import logging
 
 timeout = 5
 # Logging Setup
-logging.basicConfig(filename="population.log", 
+logging.basicConfig(filename=time.strftime('my-%Y-%m-%d.log'), 
                     level=logging.INFO,
                     format="%(asctime)s - %(levelname)s - %(message)s", 
                     filemode='a') 
