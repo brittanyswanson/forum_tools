@@ -648,7 +648,7 @@ def update_character_stats(active_status):
             temp_list.clear()
             temp_list = [species, player_name, character_url]
             details_to_insert.append(temp_list.copy())
-            logger.info("update_character_stats() > Added" + str(character_url) + " to list.")
+            logger.info(str(record_count) + " Added " + str(character_url) + " to list.")
         record_count+=1
         
 
