@@ -175,7 +175,7 @@ def get_page_topics(driver):
 def char_details(url):
     driver = webdriver.Chrome(executable_path=path,options=chrome_options)
     driver = navigate_to(url, driver)
-    logger.debut("Navigated to webpage successfully")
+    logger.debug("Navigated to webpage successfully")
     try:
         logger.debug("Getting hundredeuro ele")
         div_element = driver.find_element(By.XPATH,"//div[@class='hundredeuro']/div")
@@ -701,12 +701,13 @@ def main():
     # Re-process the characters with errors in species or player
     # -----------------------------------------------------------
     elif args.error_rerun:
-        logger.info("Getting all characters with missing fields.")
+        logger.info("Starting error_rerun process.")
         error_characters = get_all_characters_with_missing_fields()
         for i in error_characters:
             char_details = get_additional_details_about_character(i)
             # char_details = [species, player_name, url]
             update_with_details(char_details)
+        logger.info("Process Complete")
     # -----------------------------------------------------------
     # Individual URL to update character details
     # -----------------------------------------------------------
