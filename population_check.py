@@ -680,7 +680,10 @@ def main():
     # -----------------------------------------------------------
     if args.active:
         logger.info("Starting population_check.py --active/-a")
-        get_active_characters()
+        try:
+            get_active_characters()
+        except:
+            logger.error("Something went sideways in get_active_characters()")
         logger.info("Ending population_check.py --active/-a")
 
     # -----------------------------------------------------------
