@@ -435,6 +435,7 @@ def get_active_characters():
         # subforums dictionary returned
         # key = subforum name
         # value = url
+        logger.info("Getting subforums")
         character_subforums = get_subforums(driver)
 
         # **************************************************************************
@@ -442,9 +443,11 @@ def get_active_characters():
         # **************************************************************************
         # Navigate to each sub forum
         for subforum_name, subforum_url in character_subforums.items():
+            logger.info("Navigated to " + str(subforum_url))
             driver =  navigate_to(subforum_url, driver)
         
             # Get characters (topics) from the page & put in master character list
+            logger.info("get page topics")
             temp_topic_list = get_page_topics(driver)
             # Have to include a reference to the copy of the list or it disappears when we clear it
             character_list.extend(temp_topic_list.copy())
@@ -511,6 +514,8 @@ def get_active_characters():
             logger.info("driver successfully closed.")
         except Exception as e:
             logger.info("driver already closed.")
+    else:
+        logger.error("Chrome is not in config")
 
     
 def get_archived_characters():
